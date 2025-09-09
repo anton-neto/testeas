@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 import os
 import glob
@@ -57,16 +58,14 @@ def download_2via_fatura():
     # Inserindo CNPJ no campo de login
     driver.find_element(By.ID, "formulario:numDoc").send_keys(username)
 
-    # Espera explícita até que o campo de senha esteja presente
-    wait.until(EC.presence_of_element_located((By.ID, "formulario:pass")))
-    # Inserindo senha
-    driver.find_element(By.ID, "formulario:pass").send_keys(password)
+    campo_senha = wait.until(EC.presence_of_element_located((By.ID, "formulario:pass")))
+    campo_senha.send_keys(password)
+    campo_senha.send_keys(Keys.RETURN)  # Simula o Enter
 
-    # Espera explícita até que o botão de ENTRAR esteja presente
-    wait.until(EC.presence_of_element_located((By.ID, "formulario:j_idt47")))
-    time.sleep(2)
-    # Apertando no botão de Entrar
-    #driver.find_element(By.ID, "formulario:j_idt47").click()
+    # Agora espera até que a URL mude para a página certa
+    wait.until(EC.url_contains("listarUcsDoc.jsf"))
+
+
 
     # Espera explícita até que a barra de Pesquisa esteja presente
     wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ui-fluid .ui-inputtext")))
@@ -87,7 +86,7 @@ def download_2via_fatura():
     driver.get('https://www.copel.com/avaweb/paginas/segundaViaFatura.jsf')
     time.sleep(3)
     # Clicando no Botão de 2 VIA que abre o form de Download
-    elemento = driver.find_element(By.ID, "formSegundaViaFatura:dtListaSegundaViaFaturaDebitoPendente:0:j_idt72")
+    elemento = driver.find_element(By.ID, "formSegundaViaFatura:dtListaSegundaViaFaturaDebitoPendente:1:j_idt72")
     elemento.click()
     time.sleep(3)
 
@@ -114,12 +113,12 @@ def processar_dados_fatura():
     wait = WebDriverWait(driver, 180)
     wait.until(EC.presence_of_element_located((By.NAME, "email")))
     # Inserindo CNPJ no campo de login
-    driver.find_element(By.NAME, "email").send_keys('processo@smartdatabi.com.br')
+    driver.find_element(By.NAME, "email").send_keys('geovani@dev.com')
 
     # Espera explícita até que o campo de senha esteja presente
     wait.until(EC.presence_of_element_located((By.ID, "password")))
     # Inserindo senha
-    driver.find_element(By.ID, "password").send_keys('123456')
+    driver.find_element(By.ID, "password").send_keys('master100')
 
     # Espera explícita até que o botão de ENTRAR esteja presente
     wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".login100-form-btn")))
@@ -142,4 +141,11 @@ def processar_dados_fatura():
     driver.close()
 
 
+# Primeiro, baixe a fatura do site da Copel
+download_2via_fatura()
+
+# Espere um pouco para garantir que o download foi concluído
+time.sleep(5) 
+
+# Depois, processe a fatura que acabou de ser baixada
 processar_dados_fatura()
